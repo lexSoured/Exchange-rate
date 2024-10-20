@@ -3,6 +3,9 @@ import json
 import tkinter as tk
 from tkinter import messagebox, ttk
 
+def load_currencies():
+     with open(r'currensies.json', 'r', encoding='utf-8') as file:
+          return json.load(file)
 
 def exchange():
     code = combobox.get()
@@ -27,9 +30,11 @@ root = tk.Tk()
 root.title('Currency exchange rates')
 root.geometry('500x500')
 
+currencies = load_currencies()
+
 tk.Label(text='Select currency code').pack(padx=10, pady=10)
-currency_dict = ['RUB', 'EUR', 'USD', 'GBP', 'CNY', 'AZN', "BYN", "JPY", "TJS" , "TRY",]
-combobox = ttk.Combobox(values=currency_dict)
+
+combobox = ttk.Combobox(values=currencies)
 combobox.pack()
 
 # ent = ttk.Entry(root, width=30, font=("Arial", 12))
