@@ -4,36 +4,68 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 
-def exchange():
-    code = combobox.get()
+def load_currencies():
+    """Загружает данные о валютах из JSON файла."""
+    with open(r'currencies.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        # Создаем словарь, где ключи - коды валют, а значения - их названия
+        currencies = {code: value for code, value in data.items()}
+    return currencies
 
-    if code:
+
+def update_currency_label(event):
+    """Обновляет метку с названием выбранной валюты."""
+    selected_code = event.widget.get()
+    currency_name = currencies[selected_code]
+    currency_label.config(text=currency_name)
+
+
+def get_exchange_rate():
+    """Получает курс обмена валюты."""
+    selected_code = combobox.get()
+
+    if selected_code:
         try:
             response = requests.get('https://open.er-api.com/v6/latest/RUB')
             response.raise_for_status()
             data = response.json()
-            if code in data['rates']:
-                exchange_rate = data['rates'][code]
-                messagebox.showinfo('Exchange rate', f'Rate: {exchange_rate:.3f} -{code}')
+            if selected_code in data['rates']:
+                exchange_rate = data['rates'][selected_code]
+                currency_name = currencies[selected_code]
+                messagebox.showinfo('Курс обмена', f'Курс: {
+                                    exchange_rate:.3f} - {currency_name} за 1 РУБ')
             else:
-                 messagebox.showerror('Error', f'Currency with {code} not found' )    
+                messagebox.showerror('Ошибка', f'Валюта с кодом {
+                                     selected_code} не найдена')
         except Exception as e:
-                messagebox.showerror('Error', f'Error - {e}')
+            messagebox.showerror('Ошибка', f'Ошибка - {e}')
     else:
-         messagebox.showwarning('Attention', 'Entry is empty')
+        messagebox.showwarning('Внимание', 'Поле выбора пустое')
 
 
 root = tk.Tk()
-root.title('Currency exchange rates')
+root.title('Курсы обмена валют')
 root.geometry('500x500')
 
-tk.Label(text='Select currency code').pack(padx=10, pady=10)
-currency_dict = ['RUB', 'EUR', 'USD', 'GBP', 'CNY', 'AZN', "BYN", "JPY", "TJS" , "TRY",]
-combobox = ttk.Combobox(values=currency_dict)
-combobox.pack()
+# Загрузка данных о валютах
+currencies = load_currencies()
 
-# ent = ttk.Entry(root, width=30, font=("Arial", 12))
-# ent.pack()
-# ent.config(background="white", foreground="black", state="normal", style="TEntry", cursor="arrow", takefocus=1)
-tk.Button(text='Get exchange rate', justify='center' , command=exchange).pack(padx=10, pady=10)
+# Создание метки для выбора валюты
+tk.Label(text='Выберите код валюты').pack(padx=10, pady=10)
+
+# Создание выпадающего списка с кодами валют
+combobox = ttk.Combobox(width=30, height=30, values=list(currencies.keys()))
+combobox.pack()
+combobox.current(0)
+combobox.bind('<<ComboboxSelected>>', update_currency_label)
+
+# Метка для отображения названия выбранной валюты
+currency_label = tk.Label(text='Российский рубль')
+currency_label.pack(padx=10, pady=10)
+
+# Кнопка для получения курса обмена
+tk.Button(text='Получить курс обмена', justify='center',
+          command=get_exchange_rate).pack(padx=10, pady=10)
+
+# Запуск основного цикла приложения
 root.mainloop()
