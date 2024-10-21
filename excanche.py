@@ -4,11 +4,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 def load_currencies():
-     with open(r'currensies.json', 'r', encoding='utf-8') as file:
-          return json.load(file)
+    with open(r'currencies.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        currencies = [(key, value) for key, value in data.items()]
+    return currencies
+
 
 def exchange():
-    code = combobox.get()
+    selected_currency = combobox.get()
+    code, description = selected_currency.split(' - ')
 
     if code:
         try:
@@ -17,7 +21,7 @@ def exchange():
             data = response.json()
             if code in data['rates']:
                 exchange_rate = data['rates'][code]
-                messagebox.showinfo('Exchange rate', f'Rate: {exchange_rate:.3f} -{code}')
+                messagebox.showinfo('Exchange rate', f'Rate: {exchange_rate:.3f} -{code} for 1 RUB')
             else:
                  messagebox.showerror('Error', f'Currency with {code} not found' )    
         except Exception as e:
@@ -34,7 +38,7 @@ currencies = load_currencies()
 
 tk.Label(text='Select currency code').pack(padx=10, pady=10)
 
-combobox = ttk.Combobox(values=currencies)
+combobox = ttk.Combobox(values=[f'{code} - {name}' for code, name in currencies])
 combobox.pack()
 
 # ent = ttk.Entry(root, width=30, font=("Arial", 12))
