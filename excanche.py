@@ -31,38 +31,40 @@ def get_exchange_rate():
             data = response.json()
             if selected_code in data['rates']:
                 exchange_rate = data['rates'][selected_code]
-                messagebox.showinfo('Exchange rate', f'Rate: {
-                                    exchange_rate:.3f} - {selected_code} for 1 RUB')
+                currency_name = currencies[selected_code]
+                messagebox.showinfo('Курс обмена', f'Курс: {
+                                    exchange_rate:.3f} - {currency_name} за 1 РУБ')
             else:
-                messagebox.showerror('Error', f'Currency with {
-                                     selected_code} not found')
+                messagebox.showerror('Ошибка', f'Валюта с кодом {
+                                     selected_code} не найдена')
         except Exception as e:
-            messagebox.showerror('Error', f'Error - {e}')
+            messagebox.showerror('Ошибка', f'Ошибка - {e}')
     else:
-        messagebox.showwarning('Attention', 'Entry is empty')
+        messagebox.showwarning('Внимание', 'Поле выбора пустое')
 
 
 root = tk.Tk()
-root.title('Currency exchange rates')
+root.title('Курсы обмена валют')
 root.geometry('500x500')
 
 # Загрузка данных о валютах
 currencies = load_currencies()
 
 # Создание метки для выбора валюты
-tk.Label(text='Select currency code').pack(padx=10, pady=10)
+tk.Label(text='Выберите код валюты').pack(padx=10, pady=10)
 
 # Создание выпадающего списка с кодами валют
 combobox = ttk.Combobox(width=30, height=30, values=list(currencies.keys()))
 combobox.pack()
+combobox.current(0)
 combobox.bind('<<ComboboxSelected>>', update_currency_label)
 
 # Метка для отображения названия выбранной валюты
-currency_label = tk.Label()
+currency_label = tk.Label(text='Российский рубль')
 currency_label.pack(padx=10, pady=10)
 
 # Кнопка для получения курса обмена
-tk.Button(text='Get exchange rate', justify='center',
+tk.Button(text='Получить курс обмена', justify='center',
           command=get_exchange_rate).pack(padx=10, pady=10)
 
 # Запуск основного цикла приложения
